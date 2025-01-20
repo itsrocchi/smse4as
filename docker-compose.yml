@@ -1,0 +1,41 @@
+version: '3.8'
+ 
+services:
+  influxdb:
+    image: influxdb:latest
+    volumes:
+      - ./InfluxDB/data:/var/lib/influxdb2:rw
+    ports:
+      - "8086:8086"
+    env_file:
+      - .env
+    entrypoint: ["./entrypoint.sh"]
+ 
+  telegraf:
+    image: telegraf:latest
+    volumes:
+      - ./telegraf.conf:/etc/telegraf/telegraf.conf:ro
+    env_file:
+      - .env
+    depends_on:
+      - influxdb
+ 
+  mqtt:
+    image: eclipse-mosquitto:latest
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      - ./mosquitto/config:/mosquitto/config
+      - ./mosquitto/data:/mosquitto/data
+      - ./mosquitto/log:/mosquitto/log
+ 
+  monitor:
+    build: ./monitor
+    volumes:
+      - ./monitor:/app
+    depends_on:
+      - mqtt
+    environment:
+      - MQTT_BROKER=mqtt
+      - MQTT_PORT=1883

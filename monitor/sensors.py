@@ -9,7 +9,7 @@ from light import generate_light
 from humidity import generate_humidity
 
 # MQTT configuration
-mqtt_broker = "localhost"
+mqtt_broker = "host.docker.internal"
 mqtt_port = 1883
 client = mqtt.Client()
  
