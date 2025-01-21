@@ -4,7 +4,6 @@ import paho.mqtt.client as mqtt
 
 from air_quality import generate_air_quality
 from temperature import generate_temperature
-from proximity import generate_proximity
 from presence import generate_people_detector
 from light import generate_light
 from humidity import generate_humidity
@@ -29,7 +28,6 @@ def update_room_sensors(room_name, room_data):
     temperature = generate_temperature()
     light = generate_light()
     humidity = generate_humidity()
-    proximity = generate_proximity()
     people_count = room_data["people_count"]
     presence_change = generate_people_detector(people_count)
     room_data["people_count"] = max(people_count + presence_change, 0)  # Avoid negative numbers
@@ -39,7 +37,6 @@ def update_room_sensors(room_name, room_data):
     client.publish(f"room/{room_name}/temperature", json.dumps({"float_value": temperature}))
     client.publish(f"room/{room_name}/light", json.dumps({"float_value": light}))
     client.publish(f"room/{room_name}/humidity", json.dumps({"float_value": humidity}))
-    client.publish(f"room/{room_name}/proximity", json.dumps({"int_value": proximity}))
     client.publish(f"room/{room_name}/presence", json.dumps({"int_value": room_data['people_count']}))    
 
 def main():
