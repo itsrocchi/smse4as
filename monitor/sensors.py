@@ -43,7 +43,7 @@ def main():
     while True:
         for room_name, room_data in rooms.items():
             update_room_sensors(room_name, room_data)
-        time.sleep(30)
+        time.sleep(5)
 
 if __name__ == "__main__":
     main()

@@ -1,4 +1,7 @@
 import random
 
 def generate_people_detector(num_people):
-    return (num_people + random.randint(-10, 10))
+    if random.random() < 0.8:
+        return (num_people + random.randint(0, 10))
+    else:
+        return (num_people - random.randint(0, 10))
