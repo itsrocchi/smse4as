@@ -39,3 +39,11 @@ services:
     environment:
       - MQTT_BROKER=mqtt
       - MQTT_PORT=1883
+
+  analysis:
+    restart: always
+    build: ./analysis
+    volumes:
+      - ./analysis:/app    
+    depends_on:
+      - influxdb
