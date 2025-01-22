@@ -13,12 +13,13 @@ mqtt_broker = "host.docker.internal"
 mqtt_port = 1883
 client = mqtt.Client()
 
-# Room configuration
-rooms = {
-    "room1": {"size": 50, "people_count": 0},
-    "room2": {"size": 80, "people_count": 0},
-    "room3": {"size": 120, "people_count": 0},
-}
+rooms_config_path = "/app/rooms_config.json"
+with open(rooms_config_path, "r") as file:
+    rooms = json.load(file)
+
+# Aggiungere il campo people_count così il dizionario rooms incude anche il people_count inizializzato a 0
+for room in rooms:
+    rooms[room]["people_count"] = 0
 
 
 # Update sensors in a room 
@@ -28,9 +29,8 @@ def update_room_sensors(room_name, room_data):
     temperature = generate_temperature()
     light = generate_light()
     humidity = generate_humidity()
-    people_count = room_data["people_count"]
-    presence_change = generate_people_detector(people_count)
-    room_data["people_count"] = max(people_count + presence_change, 0)  # Avoid negative numbers
+    presence_change = generate_people_detector(room_data["people_count"])
+    room_data["people_count"] = max(presence_change, 0)  # Avoid negative numbers
     
     # Publish data to MQTT in JSON format with different field names
     client.publish(f"room/{room_name}/air_quality", json.dumps({"float_value": air_quality}))

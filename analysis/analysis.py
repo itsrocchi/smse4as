@@ -2,6 +2,8 @@ from influxdb_client import InfluxDBClient
 import time
 import paho.mqtt.client as mqtt
 import re
+import json
+import os
 
 # InfluxDB configuration
 INFLUXDB_URL = "http://host.docker.internal:8086"
@@ -14,21 +16,27 @@ mqtt_broker = "host.docker.internal"
 mqtt_port = 1883
 client_mqtt = mqtt.Client()
 
+rooms_config_path = "/app/rooms_config.json"
+with open(rooms_config_path, "r") as file:
+    rooms = json.load(file)
+
+# Estrarre solo le dimensioni delle stanze
+room_sizes = {room: data["size"] for room, data in rooms.items()}
+
 # Thresholds
 THRESHOLDS = {
     "temperature": {"min": 17, "max": 26},
     "humidity": {"min": 30, "max": 60},
     "air_quality": {"min": 400, "max": 1000},
     "light": {"min": 50, "max": 200},
-    "presence": {"max": lambda room_size: room_size // 2},
+    "presence": {"max": lambda room: room_sizes[room] // 2},
 }
 
 # Analyze data function
-def analyze_data(metric, values, thresholds):
+def analyze_data(metric, values, thresholds, room):
     avg_value = sum(values) / len(values)
     if metric == "presence":
-        room_size = 100  # Example room size
-        max_threshold = thresholds["max"](room_size)
+        max_threshold = thresholds["max"](room)
         if avg_value > max_threshold:
             return "Critical", avg_value
     else:
@@ -80,11 +88,12 @@ def analyze():
                     print(f"No data for metric {metric} in room {room}")
                     continue
 
-                state, avg_value = analyze_data(metric, values, thresholds)
+                state, avg_value = analyze_data(metric, values, thresholds, room)
                 result_topic = f"analysed/room/{room}/{metric}"
                 client_mqtt.publish(result_topic, f"{avg_value}: {state}")
                 print(f"Published to {result_topic}: {avg_value}: {state}")
 
+    time.sleep(1) # Wait for messages to be sent
     client_mqtt.disconnect()
 
 

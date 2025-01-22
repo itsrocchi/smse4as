@@ -34,6 +34,7 @@ services:
     build: ./monitor
     volumes:
       - ./monitor:/app
+      - ./rooms_config.json:/app/rooms_config.json
     depends_on:
       - mqtt
     environment:
@@ -44,6 +45,7 @@ services:
     restart: always
     build: ./analysis
     volumes:
-      - ./analysis:/app    
+      - ./analysis:/app  
+      - ./rooms_config.json:/app/rooms_config.json  
     depends_on:
       - influxdb
