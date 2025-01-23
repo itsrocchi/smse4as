@@ -49,3 +49,14 @@ services:
       - ./rooms_config.json:/app/rooms_config.json  
     depends_on:
       - influxdb
+
+  planner:
+    restart: always
+    build: ./planner
+    volumes:
+      - ./planner:/app
+    depends_on:
+      - analysis
+      - mqtt
+      - influxdb
+      - telegraf 
