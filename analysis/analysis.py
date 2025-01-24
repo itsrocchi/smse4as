@@ -90,8 +90,8 @@ def analyze():
 
                 state, avg_value = analyze_data(metric, values, thresholds, room)
                 result_topic = f"analysed/room/{room}/{metric}"
-                client_mqtt.publish(result_topic, f"{avg_value}: {state}")
-                print(f"Published to {result_topic}: {avg_value}: {state}")
+                client_mqtt.publish(result_topic, json.dumps({"float_value": avg_value}))
+                print(f"Published {metric} analysis for room {room}: {avg_value}: {state}")
 
     time.sleep(1) # Wait for messages to be sent
     client_mqtt.disconnect()
