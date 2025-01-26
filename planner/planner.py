@@ -5,14 +5,13 @@ import json
 import os
 
 
-## TODO: understand what to do with the thresholds
-# understand what to do with mqtt
+## TODO: understand what to do with the thresholds understand what to do with mqtt
 
-# MQTT configuration
+"""# MQTT configuration
 mqtt_broker = "host.docker.internal" 
 mqtt_port = 1883
 mqtt_topic = "analysed/room/+/+"  # Wildcard subscription
-mqtt_client = mqtt.Client()
+mqtt_client = mqtt.Client()"""
 
 # InfluxDB configuration
 INFLUXDB_URL = "http://host.docker.internal:8086"
@@ -20,15 +19,6 @@ INFLUXDB_TOKEN = "VKuvU-mLUHcoFVpCkrBCNp7VlNDzFa5A2UV3X_88yaJCNys8Z_ne1hkiVnpsur
 INFLUXDB_ORG = "smse4as"
 INFLUXDB_BUCKET = "SmartMuseum"
 
-
-# Thresholds
-THRESHOLDS = {
-    "temperature": {"min": 17, "max": 26},
-    "humidity": {"min": 30, "max": 60},
-    "air_quality": {"min": 400, "max": 1000},
-    "light": {"min": 50, "max": 200},
-    "presence": {"max": 1000},
-}
 
 # Initialize InfluxDB client
 influx_client = InfluxDBClient(url=INFLUXDB_URL, token=INFLUXDB_TOKEN, org=INFLUXDB_ORG)
@@ -94,15 +84,13 @@ def query_influxdb_topic(topic, time_range="-1h"):
         return f"Error querying InfluxDB for topic '{topic}': {e}"
 
 
-def on_connect(client, userdata, flags, rc):
-    """
+"""def on_connect(client, userdata, flags, rc):
     Callback function when MQTT connects to the broker.
-    """
     if rc == 0:
         print("Connected to MQTT broker!")
         client.subscribe(mqtt_topic)
     else:
-        print(f"Failed to connect to MQTT broker, return code: {rc}")
+        print(f"Failed to connect to MQTT broker, return code: {rc}")"""
 
 
 def run():
@@ -115,7 +103,7 @@ def run():
     mqtt_client.loop_start()"""
 
     # Generate predefined topics for n rooms
-    n_rooms = 5  # Default value, will be updated based on the JSON file
+    # n_rooms = 5  # Default value, will be updated based on the JSON file
     # Load room configuration from JSON file
     config_path = '/app/rooms_config.json'
     with open(config_path, 'r') as config_file:
@@ -124,7 +112,7 @@ def run():
 
     metrics = ["presence", "temperature", "humidity", "light", "air_quality"]
     topics = [f"analysed/room/room{i}/{metric}" for i in range(1, n_rooms + 1) for metric in metrics]
-    print(topics)
+    # print(topics)
 
     results_dict = {}
 

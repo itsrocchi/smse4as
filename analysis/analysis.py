@@ -23,20 +23,30 @@ with open(rooms_config_path, "r") as file:
 # Estrarre solo le dimensioni delle stanze
 room_sizes = {room: data["size"] for room, data in rooms.items()}
 
+# Thresholds
+THRESHOLDS = {
+    "temperature": {"min": 17, "max": 26},
+    "humidity": {"min": 30, "max": 60},
+    "air_quality": {"min": 400, "max": 1000},
+    "light": {"min": 50, "max": 200},
+    "presence": {"max": lambda room: room_sizes[room] // 2},
+}
 
 # Analyze data function
 def analyze_data(metric, values, thresholds, room):
     avg_value = sum(values) / len(values)
+    state = 0  # Default: Regular
+
     if metric == "presence":
         max_threshold = thresholds["max"](room)
         if avg_value > max_threshold:
-            return "Critical", avg_value
+            state = 1  # Critical
     else:
         if "min" in thresholds and avg_value < thresholds["min"]:
-            return "Critical", avg_value
+            state = -1  # Critical: Below min threshold
         if "max" in thresholds and avg_value > thresholds["max"]:
-            return "Critical", avg_value
-    return "Regular", avg_value
+            state = 1  # Critical: Above max threshold
+    return state, avg_value
 
 # Main analyze function
 def analyze():
@@ -80,10 +90,17 @@ def analyze():
                     print(f"No data for metric {metric} in room {room}")
                     continue
 
-                state, avg_value = analyze_data(metric, values, thresholds, room)
+                state, avg_value = analyze_data(metric, values, thresholds, room)            
                 result_topic = f"analysed/room/{room}/{metric}"
-                client_mqtt.publish(result_topic, json.dumps({"float_value": avg_value}))
-                print(f"Published {metric} analysis for room {room}: {avg_value}: {state}")
+
+                # Prepare payload with both float_value and state
+                payload = {
+                    "average": avg_value,
+                    "state": state  # 0 = Regular, 1 = Above max, -1 = Below min
+                }
+
+                client_mqtt.publish(result_topic, json.dumps(payload))
+                print(f"Published {metric} analysis for room {room}: {json.dumps(payload)}")
 
     time.sleep(1) # Wait for messages to be sent
     client_mqtt.disconnect()
