@@ -14,6 +14,7 @@ tmp/
 temp/
 knowledge/data
 mosquitto/log/data
+mosquitto/data
 
 # Ignore Docker related files
 docker-compose.override.yml

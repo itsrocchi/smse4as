@@ -55,6 +55,7 @@ services:
     build: ./planner
     volumes:
       - ./planner:/app
+      - ./rooms_config.json:/app/rooms_config.json 
     depends_on:
       - analysis
       - mqtt
