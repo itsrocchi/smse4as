@@ -3,7 +3,6 @@ import time
 import paho.mqtt.client as mqtt
 import re
 import json
-import os
 
 # InfluxDB configuration
 INFLUXDB_URL = "http://host.docker.internal:8086"
@@ -40,7 +39,9 @@ def analyze_data(metric, values, thresholds, room):
     if metric == "presence":
         max_threshold = thresholds["max"](room)
         if avg_value > max_threshold:
-            state = 1  # Critical
+            state = 2  # Critical
+        elif (avg_value > ((max_threshold * 8) // 10)) & (avg_value < max_threshold):
+                state = 1  # Warning
     else:
         if "min" in thresholds and avg_value < thresholds["min"]:
             state = -1  # Critical: Below min threshold
@@ -109,3 +110,4 @@ def analyze():
 if __name__ == "__main__":
     time.sleep(20)
     analyze()
+    time.sleep(5)
