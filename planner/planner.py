@@ -93,6 +93,30 @@ def run():
     plans = generate_plans(results_dict)
     print("\nGenerated plans:", plans)
 
+    # i piani vanno in input ad una funzione executor, che dovrebbe essere presente nel modulo execution (una sottodirectory del planner) che viene importato
+    # la funzione che fa? diverse possibilità
+    # idea 1:
+        # executor pubblica i dati su una coda mqtt (o rabbitmq), la coda viene letta da sensors che utilizza i parametri ricevuti per cambiare l'esecuzione 
+        # delle funzioni di generazione dati (vale per tutti i topic tranne per i presence)
+        # per il topic presence viene mandato un messaggio ad analysis che cambia dinamicamente per un certo intervallo di tempo la tresholds se è troppo alta
+        #(oppure viene manipolato il conteggio di persone e diminuito di un certo valore per "simulare" l'uscita delle persone)
+    # idea 2:
+        # executor è un modulo a parte ed è lui stesso a simulare l'attivazione degli attuatori (è proprio nella funzione di executor che vengono generati nuovi
+        # dati per ogni topic non allarmistici) (come fare praticamente questa cosa è da valutare, sicuramente i piani vengono passati all'executor
+        # dal planner tramite code (o influx) e in base ai piani l'executor genera dati). questo script viene tenuto in vita ed è funzionante solo per un periodo di tempo, 
+        # poi i dati torna a generarli monitor (comunque questi dati vanno tenuti e mantenuti nella knowledge come se fosse il monitor a generarli).
+
+    # idea 3 (quella da attuare dopo esserci confrontati con il Prof.):
+    # mix di idea 1 ed idea 2:
+    # il planner manda i piani all'executor (che deve essere un container a parte e non un modulo del planner), l'executor aggiorna una variabile globale
+    # la variabile è letta dal monitor che la usa per cambiare i parametri di generazione
+    # NB (valutare se usare anche qui le code MQTT); modificare le funzioni di generazione per cambiare i parametri da generare (magari con dei valori in input al metodo);
+    # divertirsi!   
+
+    
+    # machine learning? si potrebbe pensare che l'analisi usi la knowledge per predire quanti visitatori sono nell
+    # valutare comunque se farla, se riusciamo meglio, altrimenti amen.
+    
 
 if __name__ == "__main__":
     time.sleep(27)  # Wait for InfluxDB to start
