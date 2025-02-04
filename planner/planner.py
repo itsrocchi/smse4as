@@ -1,11 +1,14 @@
 import time
-import paho.mqtt.client as mqtt
+import pika 
 from influxdb_client import InfluxDBClient, Point, QueryApi
 import json
 import re
 
+# Rabbitmq configuration
+connection = pika.BlockingConnection(pika.ConnectionParameters('rabbitmq', 5672))
+channel = connection.channel()
 
-# InfluxDB configuration
+# InfluxDB configuration -> da mettere in un file di configurazione
 INFLUXDB_URL = "http://host.docker.internal:8086"
 INFLUXDB_TOKEN = "VKuvU-mLUHcoFVpCkrBCNp7VlNDzFa5A2UV3X_88yaJCNys8Z_ne1hkiVnpsurc_kb1dp3ZDoovA-ko1hC8VLw=="
 INFLUXDB_ORG = "smse4as"
@@ -66,6 +69,8 @@ def generate_plans(results_dict):
 
 def run():
 
+    
+
     # Load room configuration from JSON file
     config_path = '/app/rooms_config.json'
     with open(config_path, 'r') as config_file:
@@ -93,6 +98,14 @@ def run():
     plans = generate_plans(results_dict)
     print("\nGenerated plans:", plans)
 
+    channel.queue_declare(queue='planner_queue')
+    json_message = json.dumps(plans)
+
+    channel.basic_publish(exchange='', routing_key='planner_queue', body=json_message)
+    print(" [x] Sent %r" % json_message)
+
+    connection.close()
+
     # i piani vanno in input ad una funzione executor, che dovrebbe essere presente nel modulo execution (una sottodirectory del planner) che viene importato
     # la funzione che fa? diverse possibilità
     # idea 1:
@@ -117,6 +130,7 @@ def run():
     # machine learning? si potrebbe pensare che l'analisi usi la knowledge per predire quanti visitatori sono nell
     # valutare comunque se farla, se riusciamo meglio, altrimenti amen.
     
+
 
 if __name__ == "__main__":
     time.sleep(27)  # Wait for InfluxDB to start
