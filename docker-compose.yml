@@ -42,9 +42,12 @@ services:
  
   monitor:
     build: ./monitor
+    ports:
+      - "5000:5000"
     volumes:
       - ./monitor:/app
       - ./rooms_config.json:/app/rooms_config.json
+      - shared_data:/shared  # Volume condiviso con l'executor
     depends_on:
       - mqtt
     environment:
@@ -66,18 +69,29 @@ services:
     volumes:
       - ./planner:/app
       - ./rooms_config.json:/app/rooms_config.json 
+      - ./wait-for-it.sh:/app/wait-for-it.sh
     depends_on:
       - analysis
       - influxdb
       - telegraf 
       - rabbitmq
+    environment:
+      - RABBITMQ_HOST=rabbitmq  # Usa il nome del servizio come host
   
   executor:
     restart: always
     build: ./executor
     volumes:
       - ./executor:/app
+      - shared_data:/shared  # Volume condiviso con il monitor
+      - ./wait-for-it.sh:/app/wait-for-it.sh
     depends_on:
       - planner
       - mqtt
       - rabbitmq
+    environment:
+      - RABBITMQ_HOST=rabbitmq  # Usa il nome del servizio come host
+
+
+volumes:
+  shared_data:  # Volume Docker condiviso tra executor e monitor

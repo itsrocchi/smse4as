@@ -1,2 +1,4 @@
 influxdb-client
 pika
+paho-mqtt
+requests

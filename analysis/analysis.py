@@ -24,11 +24,11 @@ room_sizes = {room: data["size"] for room, data in rooms.items()}
 
 # Thresholds
 THRESHOLDS = {
+    "presence": {"max": lambda room: room_sizes[room] // 2},
     "temperature": {"min": 17, "max": 26},
     "humidity": {"min": 30, "max": 60},
-    "air_quality": {"min": 400, "max": 1000},
     "light": {"min": 50, "max": 200},
-    "presence": {"max": lambda room: room_sizes[room] // 2},
+    "air_quality": {"min": 400, "max": 1000}    
 }
 
 # Analyze data function
@@ -110,4 +110,3 @@ def analyze():
 if __name__ == "__main__":
     time.sleep(20)
     analyze()
-    time.sleep(5)

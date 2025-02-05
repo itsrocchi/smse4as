@@ -8,7 +8,7 @@ WORKDIR /monitor
 COPY . /monitor
  
 # Install any needed packages specified in requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirementss.txt
  
 # Run app.py when the container launches
 CMD ["python", "sensors.py"]            

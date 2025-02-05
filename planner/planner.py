@@ -1,11 +1,15 @@
+from calendar import c
 import time
 import pika 
 from influxdb_client import InfluxDBClient, Point, QueryApi
 import json
 import re
 
+# Define credentials
+credentials = pika.PlainCredentials('user', 'password')
+
 # Rabbitmq configuration
-connection = pika.BlockingConnection(pika.ConnectionParameters('rabbitmq', 5672))
+connection = pika.BlockingConnection(pika.ConnectionParameters(host='host.docker.internal', port=5672, credentials=credentials))
 channel = connection.channel()
 
 # InfluxDB configuration -> da mettere in un file di configurazione
@@ -133,5 +137,5 @@ def run():
 
 
 if __name__ == "__main__":
-    time.sleep(27)  # Wait for InfluxDB to start
+    time.sleep(20)  # Wait for InfluxDB to start
     run()
