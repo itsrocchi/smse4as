@@ -39,12 +39,24 @@ method_values = []
 
 # Function to update sensors in a room and publish data to MQTT
 def update_room_sensors(room_name, room_data):
+
+    if os.path.exists(file_path):  # Controlla se il file esiste
+            with open(file_path, "r") as f:
+                try:
+                    state = json.load(f)  # Legge lo stato dal file
+                    # legge i dati della stanza room_name
+                    room_state = state[room_name]
+                    print(room_name, room_state)
+                except json.JSONDecodeError:
+                    print("Monitor: Errore nella decodifica del file JSON")
+    
+
     client.connect(mqtt_broker, mqtt_port)
-    air_quality = generate_air_quality()
-    temperature = generate_temperature()
-    light = generate_light()
-    humidity = generate_humidity()
-    presence_change = generate_people_detector(room_data["people_count"])
+    air_quality = generate_air_quality(room_state["air_quality"])
+    temperature = generate_temperature(room_state["temperature"])
+    light = generate_light(room_state["light"])
+    humidity = generate_humidity(room_state["humidity"])
+    presence_change = generate_people_detector(room_data["people_count"], room_state["presence"])
     room_data["people_count"] = max(presence_change, 0)  # Avoid negative numbers
     
     # Publish data to MQTT in JSON format with different field names
@@ -72,13 +84,6 @@ def main():
 
     #ciclo infinito che ogni 5 secondi legge lo stato dal file e aggiorna i sensori delle stanze
     while True:
-        if os.path.exists(file_path):  # Controlla se il file esiste
-            with open(file_path, "r") as f:
-                try:
-                    state = json.load(f)  # Legge lo stato dal file
-                    print("Monitor: Stato ricevuto:", state)
-                except json.JSONDecodeError:
-                    print("Monitor: Errore nella decodifica del file JSON")
         for room_name, room_data in rooms.items():
             update_room_sensors(room_name, room_data)
         time.sleep(5)

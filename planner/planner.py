@@ -23,7 +23,7 @@ INFLUXDB_BUCKET = "SmartMuseum"
 influx_client = InfluxDBClient(url=INFLUXDB_URL, token=INFLUXDB_TOKEN, org=INFLUXDB_ORG)
 query_api = influx_client.query_api()
 
-def query_influxdb_topic(topic, time_range="-1h"):
+def query_influxdb_topic(topic, time_range="-20s"):
     """
     Queries InfluxDB for a specific topic.
     """

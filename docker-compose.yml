@@ -25,6 +25,8 @@ services:
     ports:
       - "1883:1883"
       - "9001:9001"
+    env_file:
+      - .env
     volumes:
       - ./mosquitto/config:/mosquitto/config
       - ./mosquitto/data:/mosquitto/data
@@ -36,14 +38,35 @@ services:
     ports:
       - "5672:5672"   
       - "15672:15672"
+    env_file:
+      - .env
     environment:
       RABBITMQ_DEFAULT_USER: user
       RABBITMQ_DEFAULT_PASS: password
+
+  grafana:
+    restart: always
+    image: grafana/grafana-enterprise:latest
+    container_name: grafana
+    env_file:
+      - .env
+    volumes:
+      - ./Grafana/data:/var/lib/grafana:rw
+    depends_on:
+      - influxdb
+      - telegraf
+      - mqtt
+      - rabbitmq
+    ports:
+      - 3000:3000
+    user: "$UID:$GID"
  
   monitor:
     build: ./monitor
     ports:
       - "5000:5000"
+    env_file:
+      - .env
     volumes:
       - ./monitor:/app
       - ./rooms_config.json:/app/rooms_config.json
@@ -57,6 +80,8 @@ services:
   analysis:
     restart: always
     build: ./analysis
+    env_file:
+      - .env
     volumes:
       - ./analysis:/app  
       - ./rooms_config.json:/app/rooms_config.json  
@@ -66,6 +91,8 @@ services:
   planner:
     restart: always
     build: ./planner
+    env_file:
+      - .env
     volumes:
       - ./planner:/app
       - ./rooms_config.json:/app/rooms_config.json 
@@ -81,6 +108,8 @@ services:
   executor:
     restart: always
     build: ./executor
+    env_file:
+      - .env
     volumes:
       - ./executor:/app
       - shared_data:/shared  # Volume condiviso con il monitor
