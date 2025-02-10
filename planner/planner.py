@@ -4,6 +4,7 @@ import pika
 from influxdb_client import InfluxDBClient, Point, QueryApi
 import json
 import re
+import os
 
 # Define credentials
 credentials = pika.PlainCredentials('user', 'password')
@@ -12,12 +13,10 @@ credentials = pika.PlainCredentials('user', 'password')
 connection = pika.BlockingConnection(pika.ConnectionParameters(host='host.docker.internal', port=5672, credentials=credentials))
 channel = connection.channel()
 
-# InfluxDB configuration -> da mettere in un file di configurazione
-INFLUXDB_URL = "http://host.docker.internal:8086"
-INFLUXDB_TOKEN = "VKuvU-mLUHcoFVpCkrBCNp7VlNDzFa5A2UV3X_88yaJCNys8Z_ne1hkiVnpsurc_kb1dp3ZDoovA-ko1hC8VLw=="
-INFLUXDB_ORG = "smse4as"
-INFLUXDB_BUCKET = "SmartMuseum"
-
+INFLUXDB_URL = os.getenv("INFLUXDB_URL")
+INFLUXDB_TOKEN = os.getenv("INFLUXDB_TOKEN")
+INFLUXDB_ORG = os.getenv("INFLUXDB_ORG")
+INFLUXDB_BUCKET = os.getenv("INFLUXDB_BUCKET")
 
 # Initialize InfluxDB client
 influx_client = InfluxDBClient(url=INFLUXDB_URL, token=INFLUXDB_TOKEN, org=INFLUXDB_ORG)

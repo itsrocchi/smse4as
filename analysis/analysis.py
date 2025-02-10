@@ -3,12 +3,13 @@ import time
 import paho.mqtt.client as mqtt
 import re
 import json
+import os
 
 # InfluxDB configuration
-INFLUXDB_URL = "http://host.docker.internal:8086"
-INFLUXDB_TOKEN = "VKuvU-mLUHcoFVpCkrBCNp7VlNDzFa5A2UV3X_88yaJCNys8Z_ne1hkiVnpsurc_kb1dp3ZDoovA-ko1hC8VLw=="
-INFLUXDB_ORG = "smse4as"
-INFLUXDB_BUCKET = "SmartMuseum"
+INFLUXDB_URL = os.getenv("INFLUXDB_URL")
+INFLUXDB_TOKEN = os.getenv("INFLUXDB_TOKEN")
+INFLUXDB_ORG = os.getenv("INFLUXDB_ORG")
+INFLUXDB_BUCKET = os.getenv("INFLUXDB_BUCKET")
 
 # MQTT configuration
 mqtt_broker = "host.docker.internal"
