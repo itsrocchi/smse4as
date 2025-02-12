@@ -1,14 +1,12 @@
 # SMSE4AS: Software Engineering for Autonomous Systems
 
-This repository contains the code and resources for the University Project in the Software Engineering for Autonomous Systems course. The primary languages used in this repository are Python, Shell, and Dockerfile.
+This repository contains the code and resources for the University Project in the Software Engineering for Autonomous Systems course. The primary languages used in this repository are Python, Shell, and Dockerfile. Check the [Documentation](sm_doc.pdf) for more informations regarding the project.
 
 ## Table of Contents
 
 - [Introduction](#introduction)
 - [Installation](#installation)
 - [Usage](#usage)
-- [Project Structure](#project-structure)
-- [Contributing](#contributing)
 - [License](#license)
 
 ## Introduction
@@ -44,10 +42,6 @@ To run the project, simply use Docker Compose:
     ```bash
     docker-compose up
     ```
-
-## Contributing
-
-Contributions are welcome! If you have any ideas, suggestions, or improvements, feel free to open an issue or submit a pull request. Please follow the project's code of conduct.
 
 ## License
 
