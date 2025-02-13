@@ -6,8 +6,6 @@ import json
 import re
 import os
 
-from executor.executor import PIKA_USER
-
 
 PIKA_USER = os.getenv("PIKA_USER")
 PIKA_PASSWORD = os.getenv("PIKA_PASSWORD")
