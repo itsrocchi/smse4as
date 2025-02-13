@@ -67,7 +67,7 @@ def analyze():
             |> keep(columns: ["_value", "topic"])
             """
 
-            print(f"Generated Flux query for {metric}:\n{query}")
+            #print(f"Generated Flux query for {metric}:\n{query}")
 
             try:
                 tables = query_api.query(query)

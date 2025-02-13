@@ -10,7 +10,6 @@ file_path = "/shared/state.json"
 PIKA_USER = os.getenv("PIKA_USER")
 PIKA_PASSWORD = os.getenv("PIKA_PASSWORD")
 
-# Define credentials
 credentials = pika.PlainCredentials(PIKA_USER, PIKA_PASSWORD)
 
 def execute_plan(plan):

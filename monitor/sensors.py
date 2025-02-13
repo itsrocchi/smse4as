@@ -46,7 +46,7 @@ def update_room_sensors(room_name, room_data):
                     state = json.load(f)  # Legge lo stato dal file
                     # legge i dati della stanza room_name
                     room_state = state[room_name]
-                    print(room_name, room_state)
+                    #print(room_name, room_state)
                 except json.JSONDecodeError:
                     print("Monitor: Errore nella decodifica del file JSON")
     
