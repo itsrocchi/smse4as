@@ -3,16 +3,18 @@ import random
 # Funzione per generare luce con probabilità
 def generate_light(value):
 
-    if value == -1:
+    if (value == -2 | value == 2):
+        return random.uniform(50, 200)
+    elif value == -1:
         if random.random() < 0.9:
             return random.uniform(50, 200)
         else: 
-            return random.uniform(201, 300)
+            return random.uniform(0, 49)
     elif value == 1:
         if random.random() < 0.9: 
             return random.uniform(50, 200)
         else:  
-            return random.uniform(0, 49)
+            return random.uniform(201, 300)
     else:
         if random.random() < 0.8:  # 80% di probabilità per valori normali
             return random.uniform(50, 200)

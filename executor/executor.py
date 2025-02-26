@@ -5,7 +5,7 @@ import time
 import paho.mqtt.client as mqtt
 
 
-file_path = "/shared/state.json"
+file_path = "/shared/actuators.json"
 
 PIKA_USER = os.getenv("PIKA_USER")
 PIKA_PASSWORD = os.getenv("PIKA_PASSWORD")
@@ -24,11 +24,11 @@ def execute_plan(plan):
 
     for room, values in plan.items():
         state[room] = {
-            "presence": int(float(values['presence'])),
-            "temperature": int(float(values['temperature'])),
-            "humidity": int(float(values['humidity'])),
-            "light": int(float(values['light'])),
-            "air_quality": int(float(values['air_quality']))
+            "door": int(float(values['door'])),
+            "hvac_temp": int(float(values['hvac_temp'])),
+            "hvac_hum": int(float(values['hvac_hum'])),
+            "adaptive_light": int(float(values['adaptive_light'])),
+            "ventilation": int(float(values['ventilation'])),
         }
 
     with open(file_path, "w") as file:

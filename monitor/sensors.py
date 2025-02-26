@@ -15,7 +15,7 @@ mqtt_broker = "host.docker.internal"
 mqtt_port = 1883
 client = mqtt.Client()
 
-file_path = "/shared/state.json"
+file_path = "/shared/actuators.json"
 
 rooms_config_path = "/app/rooms_config.json"
 with open(rooms_config_path, "r") as file:
@@ -43,20 +43,20 @@ def update_room_sensors(room_name, room_data):
     if os.path.exists(file_path):  # Controlla se il file esiste
             with open(file_path, "r") as f:
                 try:
-                    state = json.load(f)  # Legge lo stato dal file
+                    actuators = json.load(f)  # Legge lo stato dal file
                     # legge i dati della stanza room_name
-                    room_state = state[room_name]
+                    room_state = actuators[room_name]
                     #print(room_name, room_state)
                 except json.JSONDecodeError:
                     print("Monitor: Errore nella decodifica del file JSON")
     
 
     client.connect(mqtt_broker, mqtt_port)
-    air_quality = generate_air_quality(room_state["air_quality"])
-    temperature = generate_temperature(room_state["temperature"])
-    light = generate_light(room_state["light"])
-    humidity = generate_humidity(room_state["humidity"])
-    presence_change = generate_people_detector(room_data["people_count"], room_state["presence"])
+    air_quality = generate_air_quality(room_state["ventilation"])
+    temperature = generate_temperature(room_state["hvac_temp"])
+    light = generate_light(room_state["adaptive_light"])
+    humidity = generate_humidity(room_state["hvac_hum"])
+    presence_change = generate_people_detector(room_data["people_count"], room_state["door"])
     room_data["people_count"] = max(presence_change, 0)  # Avoid negative numbers
     
     # Publish data to MQTT in JSON format with different field names
@@ -69,17 +69,17 @@ def update_room_sensors(room_name, room_data):
 
 def main():
     #scrive sul file in file path un json con i dati delle stanze impostati a 0, il numero di stanze lo valuti in base a rooms_config.json
-    state = {}
+    actuators = {}
     for room_name in rooms:
-        state[room_name] = {
-            "presence": 0,
-            "temperature": 0,
-            "humidity": 0,
-            "light": 0,
-            "air_quality": 0
+        actuators[room_name] = {
+            "door": 0,
+            "hvac_temp": 0,
+            "hvac_hum": 0,
+            "adaptive_light": 0,
+            "ventilation": 0
         }
     with open(file_path, "w") as f:
-        json.dump(state, f, indent=4)
+        json.dump(actuators, f, indent=4)
     print("Monitor: Stato iniziale scritto")
 
     #ciclo infinito che ogni 5 secondi legge lo stato dal file e aggiorna i sensori delle stanze

@@ -70,7 +70,7 @@ services:
     volumes:
       - ./monitor:/app
       - ./rooms_config.json:/app/rooms_config.json
-      - shared_data:/shared  # Volume condiviso con l'executor
+      - shared_data:/shared  # Volume condiviso
     depends_on:
       - mqtt
     environment:
@@ -97,6 +97,7 @@ services:
       - ./planner:/app
       - ./rooms_config.json:/app/rooms_config.json 
       - ./wait-for-it.sh:/app/wait-for-it.sh
+      - shared_data:/shared  # Volume condiviso
     depends_on:
       - analysis
       - influxdb
@@ -112,7 +113,7 @@ services:
       - .env
     volumes:
       - ./executor:/app
-      - shared_data:/shared  # Volume condiviso con il monitor
+      - shared_data:/shared  # Volume condiviso
       - ./wait-for-it.sh:/app/wait-for-it.sh
     depends_on:
       - planner

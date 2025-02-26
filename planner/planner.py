@@ -22,6 +22,8 @@ INFLUXDB_TOKEN = os.getenv("INFLUXDB_TOKEN")
 INFLUXDB_ORG = os.getenv("INFLUXDB_ORG")
 INFLUXDB_BUCKET = os.getenv("INFLUXDB_BUCKET")
 
+file_path = "/shared/actuators.json"
+
 # Initialize InfluxDB client
 influx_client = InfluxDBClient(url=INFLUXDB_URL, token=INFLUXDB_TOKEN, org=INFLUXDB_ORG)
 query_api = influx_client.query_api()
@@ -53,24 +55,91 @@ def query_influxdb_topic(topic, time_range="-20s"):
     
 
 def generate_plans(results_dict):
+
+    # create a new dictionary to store the values of the actuators read from the actuators.json file:
+    
+    actuators = {}
+    if os.path.exists(file_path):
+        with open(file_path, "r") as file:
+            try:
+                actuators = json.load(file)
+            except json.JSONDecodeError:
+                actuators = {}
+
+    #print("State of the actuators:", actuators)
+    #print("Results Dictionary:", results_dict)
+
+    """ in actuators c'è lo stato "attuale" degli attuatori, mentre in result dict c'è lo stato "attuale" della room
+        ora per ogni stanza ho bisogno di un dizionario del tipo: 
+        roomX: {
+            {presence: result_dict['analysed/room/roomX/presence'], door: actuators[roomX][door]}, 
+            {temperature: result_dict['analysed/room/roomX/temperature'], hvac_temp: actuators[roomX][hvac_temp]}, 
+            {humidity: result_dict['analysed/room/roomX/humidity'], hvac_hum: actuators[roomX][hvac_hum]}, 
+            {light: result_dict['analysed/room/roomX/light'], adaptive_light: actuators[roomX][adaptive_light]}, 
+            {air_quality: result_dict['analysed/room/roomX/air_quality'], ventilation: actuators[roomX][ventilation]}}
+    """
+
+    
+    snapshot = {}
+    for room in actuators.keys():
+        snapshot[room] = {
+            "door": {"sensor": results_dict.get(f"analysed/room/{room}/presence", "unknown"), "door": actuators[room].get("door", "unknown")},
+            "hvac_temp": {"sensor": results_dict.get(f"analysed/room/{room}/temperature", "unknown"), "hvac_temp": actuators[room].get("hvac_temp", "unknown")},
+            "hvac_hum": {"sensor": results_dict.get(f"analysed/room/{room}/humidity", "unknown"), "hvac_hum": actuators[room].get("hvac_hum", "unknown")},
+            "adaptive_light": {"sensor": results_dict.get(f"analysed/room/{room}/light", "unknown"), "adaptive_light": actuators[room].get("adaptive_light", "unknown")},
+            "ventilation": {"sensor": results_dict.get(f"analysed/room/{room}/air_quality", "unknown"), "ventilation": actuators[room].get("ventilation", "unknown")}
+        }
+
+    print("Snapshot:", snapshot)
+    
+
+    #in generale, se snapshot[room][metric]['sensor'] è 0 allora non faccio nulla
+    #se snapshot[room][metric]['sensor'] è 1 e snapshot[room][metric]['actuator'] è 0, allora plan[room][metric] = -1
+    #se snapshot[room][metric]['sensor'] è 1 e snapshot[room][metric]['actuator'] è -1, allora plan[room][metric] = -2
+    #se snapshot[room][metric]['sensor'] è 1 e snapshot[room][metric]['actuator'] è maggiore o uguale 1, allora plan[room][metric] = 0
+    #se snapshot[room][metric]['sensor'] è -1 e snapshot[room][metric]['actuator'] è 0, allora plan[room][metric] = 1
+    #se snapshot[room][metric]['sensor'] è -1 e snapshot[room][metric]['actuator'] è 1, allora plan[room][metric] = 2
+    #se snapshot[room][metric]['sensor'] è -1 e snapshot[room][metric]['actuator'] è minore o uguale -1, allora plan[room][metric] = 0
+
+    #quanto detto vale nel caso generale, per la metrica presence, se snapshot[room][presence]['sensor'] è 2 allora plan[room][presence] = 1
+    #se snapshot[room][presence]['sensor'] è 1oppure0 allora plan[room][presence] = 0
+
     plans = {}
 
-    for topic, state in results_dict.items():
+    for room in snapshot.keys():
+        plans[room] = {}
+        for actuator in snapshot[room].keys():
+            sensor_value = float(snapshot[room][actuator]['sensor'])  # Conversione
+            actuator_value = snapshot[room][actuator].get('actuator', 0)  # Assicurati che esista
 
-        # Estrarre stanza e metrica dal topic
-        match = re.match(r"analysed/room/(room\d+)/(\w+)", topic)
-        if not match:
-            continue  # Salta i topic non validi
-        room, metric = match.groups()
+            if actuator == "door":
+                if sensor_value == 1:
+                    plans[room][actuator] = 1
+                else:
+                    plans[room][actuator] = 0
+            else:
+                if sensor_value == 0:
+                    plans[room][actuator] = 0
+                elif sensor_value == 1:
+                    if actuator_value == 0:
+                        plans[room][actuator] = -1
+                    elif actuator_value == -1:
+                        plans[room][actuator] = -2
+                    elif actuator_value >= 1:
+                        plans[room][actuator] = 0
+                elif sensor_value == -1:
+                    if actuator_value == 0:
+                        plans[room][actuator] = 1
+                    elif actuator_value == 1:
+                        plans[room][actuator] = 2
+                    elif actuator_value <= -1:
+                        plans[room][actuator] = 0
 
-        # Inizializzare il piano della stanza se non esiste
-        if room not in plans:
-            plans[room] = {}
-
-        # Aggiungere l'azione al piano della stanza
-        plans[room][metric] = state
-
+    print("Plans:", plans)
     return plans
+
+    
+
 
 
 

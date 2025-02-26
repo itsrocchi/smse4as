@@ -3,16 +3,18 @@ import random
 # Funzione per generare temperatura con probabilità
 def generate_temperature(value):
 
-    if value == -1:
-        if random.random() < 0.9:
+    if (value == -2 | value == 2):
+        return random.uniform(18, 25)
+    elif value == -1:
+        if random.random() < 0.9: 
             return random.uniform(18, 25)
-        else: 
-            return random.uniform(26, 35)
+        else:  
+            return random.uniform(8, 17)  
     elif value == 1:
         if random.random() < 0.9: 
             return random.uniform(18, 25)
         else:  
-            return random.uniform(8, 17)    
+            return random.uniform(26, 35)
     else:
         if random.random() < 0.8:  # 80% di probabilità per valori normali
             return random.uniform(18, 25)

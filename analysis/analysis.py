@@ -5,6 +5,8 @@ import re
 import json
 import os
 
+
+
 # InfluxDB configuration
 INFLUXDB_URL = os.getenv("INFLUXDB_URL")
 INFLUXDB_TOKEN = os.getenv("INFLUXDB_TOKEN")
@@ -23,14 +25,14 @@ with open(rooms_config_path, "r") as file:
 # Estrarre solo le dimensioni delle stanze
 room_sizes = {room: data["size"] for room, data in rooms.items()}
 
-# Thresholds
-THRESHOLDS = {
-    "presence": {"max": lambda room: room_sizes[room] // 2},
-    "temperature": {"min": 17, "max": 26},
-    "humidity": {"min": 30, "max": 60},
-    "light": {"min": 50, "max": 200},
-    "air_quality": {"min": 400, "max": 1000}    
-}
+# Leggere la variabile d'ambiente
+thresholds_json = os.getenv("THRESHOLDS")
+THRESHOLDS = json.loads(thresholds_json) if thresholds_json else {}
+
+# Sostituire il segnaposto con la funzione lambda
+if "presence" in THRESHOLDS and "max" in THRESHOLDS["presence"]:
+    if THRESHOLDS["presence"]["max"] == "ROOM_SIZE_HALF":
+        THRESHOLDS["presence"]["max"] = lambda room: room_sizes[room] // 2
 
 # Analyze data function
 def analyze_data(metric, values, thresholds, room):
@@ -40,9 +42,7 @@ def analyze_data(metric, values, thresholds, room):
     if metric == "presence":
         max_threshold = thresholds["max"](room)
         if avg_value > max_threshold:
-            state = 2  # Critical
-        elif (avg_value > ((max_threshold * 8) // 10)) & (avg_value < max_threshold):
-                state = 1  # Warning
+            state = 1  # Critical
     else:
         if "min" in thresholds and avg_value < thresholds["min"]:
             state = -1  # Critical: Below min threshold
